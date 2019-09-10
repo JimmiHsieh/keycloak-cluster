@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: keycloak-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: example-auth-ip
+    networking.gke.io/managed-certificates: plg-auth-certificate
+spec:
+  backend:
+    serviceName: keycloak-service
+    servicePort: 80
+  
+    

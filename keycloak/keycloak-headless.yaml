@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: keycloak
+    release: keycloak
+  name: keycloak-headless
+  namespace: default
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+  selector:
+    app: keycloak
+    release: keycloak
+  type: ClusterIP

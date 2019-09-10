@@ -1,0 +1,77 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  labels:
+    app: keycloak
+    release: keycloak
+  name: keycloak
+  namespace: default
+spec:
+  podManagementPolicy: Parallel
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+      release: keycloak
+  serviceName: keycloak-set
+  template:
+    metadata:
+      labels:
+        app: keycloak
+        release: keycloak
+    spec:
+      containers:
+      - env:
+          - name: KEYCLOAK_LOGLEVEL
+            value: "WARN"
+          - name: DB_VENDOR
+            value: "postgres"
+          - name: PROXY_ADDRESS_FORWARDING
+            value: "true"
+          - name: KEYCLOAK_USER
+            value: "admin"
+          - name: KEYCLOAK_PASSWORD
+            value: "1234"
+          - name: DB_USER
+            value: "postgres"
+          - name: DB_PASSWORD
+            value: "postgres"
+          - name: DB_ADDR
+            value: "cloudsql-proxy-service"
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_DATABASE
+            value: "postgres"
+          - name: JGROUPS_DISCOVERY_PROTOCOL
+            value: dns.DNS_PING
+          - name: JGROUPS_DISCOVERY_PROPERTIES
+            value: dns_query=keycloak-headless.default.svc.cluster.local
+        image: asia.gcr.io/{PROJECT_ID}/keycloak
+        imagePullPolicy: IfNotPresent
+        name: keycloak
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /auth/
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /auth/
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
